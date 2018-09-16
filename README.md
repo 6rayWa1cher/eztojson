@@ -8,7 +8,7 @@ layer of scanning.
 # Usage
 1. Be sure to make getters for all necessary fields
 2. Receive object of ETJReference: `ETJUtility.create()`
-3. Set up necessary parameters: `etjReference.configure(Properties, Object)`,
+3. Set up necessary parameters: `etjReference.configure(Object, Properties)`,
 where Object - new value of parameter
 4. Using etjReference, parse Java class to JSON: `etjReference.process(Object, int)`,
 where int is scanning depth. 
