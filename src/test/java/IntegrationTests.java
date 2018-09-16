@@ -1,9 +1,11 @@
 import com.a6raywa1cher.eztojson.ETJReference;
 import com.a6raywa1cher.eztojson.ETJUtility;
 import com.a6raywa1cher.eztojson.adapter.POJOAdapter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import subject.Aviary;
 import subject.Employee;
 import subject.Zoo;
 
@@ -65,6 +67,33 @@ public class IntegrationTests {
 		Assert.assertEquals(employee.getId(), jsonObject.opt("id"));
 		Assert.assertEquals(employee.getLastName(), jsonObject.opt("last_name"));
 		Assert.assertEquals(employee.getSalary().toString(), jsonObject.opt("salary").toString());
-
 	}
+
+	@Test
+	public void arrayAndScanningTest() {
+		Employee[] employees = new Employee[2];
+		employees[0] = new Employee();
+		employees[0].setId(154);
+		employees[0].setLastName("secret");
+		employees[0].setPassnum(10L);
+		employees[1] = new Employee();
+		employees[1].setId(145);
+		employees[1].setLastName("secret_too");
+		employees[1].setPassnum(14L);
+		Aviary aviary = new Aviary();
+		aviary.setEmployees(employees);
+		aviary.setName("test_aviary");
+		ETJReference etjReference = ETJUtility.create(new POJOAdapter());
+		JSONObject scanning0 = etjReference.process(aviary),
+				scanning1 = etjReference.process(aviary, 1);
+		System.out.println(scanning0.toString());
+		System.out.println(scanning1.toString());
+		JSONObject emp0 = etjReference.process(employees[0]), emp1 = etjReference.process(employees[1]);
+		Assert.assertTrue(scanning0.has("employeesIds"));
+		Assert.assertTrue(scanning1.has("employees"));
+		Assert.assertEquals(new JSONArray("[154,145]").toString(), scanning0.optJSONArray("employeesIds").toString());
+		Assert.assertEquals(new JSONArray().put(emp0).put(emp1).toString(), scanning1.optJSONArray("employees").toString());
+	}
+
+
 }
