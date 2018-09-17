@@ -14,6 +14,10 @@ public class Employee {
 	private LocalDate birthday;
 	private BigDecimal salary;
 
+	public String getFullName() {
+		return firstName + " " + lastName;
+	}
+
 	public Integer getId() {
 		return id;
 	}

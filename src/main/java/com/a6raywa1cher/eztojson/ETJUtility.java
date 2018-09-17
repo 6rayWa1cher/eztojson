@@ -2,6 +2,7 @@ package com.a6raywa1cher.eztojson;
 
 import com.a6raywa1cher.eztojson.adapter.Adapter;
 import com.a6raywa1cher.eztojson.annotation.ETJField;
+import com.a6raywa1cher.eztojson.annotation.ETJMethod;
 import com.a6raywa1cher.eztojson.annotation.ShortInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -82,7 +83,7 @@ public class ETJUtility {
 						break;
 				}
 			} catch (Exception ignored) {
-				ignored.printStackTrace();
+//				ignored.printStackTrace();
 			}
 		}
 		return json;
@@ -172,6 +173,17 @@ public class ETJUtility {
 
 			}
 		}
+		for (Method method : c.getMethods()) {
+			if (method.isAnnotationPresent(ETJMethod.class)) {
+				ETJMethod etjMethod = method.getAnnotation(ETJMethod.class);
+				Set<Annotation> annotations = new HashSet<>();
+				Collections.addAll(annotations, method.getAnnotations());
+				persistenceFields.add(new FieldContainer(
+						etjMethod.name().equals("") ? method.getName() : etjMethod.name(),
+						method, method.getReturnType(), getType(method.getReturnType()), annotations,
+						false, true, true));
+			}
+		}
 		if (otherFields.size() == 0 && persistenceFields.size() == 0 && shortInfo == null) {
 			classContainer = new ClassContainer(c);
 		} else {
@@ -186,7 +198,7 @@ public class ETJUtility {
 		}
 	}
 
-	private static String unGet(String s) {
+	static String unGet(String s) {
 		if (s != null && s.startsWith("get")) {
 			return Character.toLowerCase(s.charAt(3)) + s.substring(4);
 		} else return s;
@@ -220,6 +232,17 @@ public class ETJUtility {
 		Set<FieldContainer> set = new HashSet<>(classContainer.persistenceFields);
 		set.addAll(classContainer.otherFields);
 		set.add(classContainer.shortInfo);
+		if (j.additionalMethods != null && j.additionalMethods.containsKey(cl)) {
+			for (AdditionalMethodSetting ams : j.additionalMethods.get(cl)) {
+				Method method = ams.getMethod();
+				String name = ams.getName();
+				Set<Annotation> annotations = new HashSet<>();
+				Collections.addAll(annotations, method.getAnnotations());
+				set.add(new FieldContainer(
+						name, method, method.getReturnType(), getType(method.getReturnType()), annotations,
+						false, true, true));
+			}
+		}
 		boolean whiteCheck = j.nullSafeContains(j.whiteSetOfMethodsIn, cl);
 		boolean blackCheck = j.nullSafeContains(j.blackSetOfMethodsIn, cl);
 		if (whiteCheck && blackCheck) throw new RuntimeException("white&black!");

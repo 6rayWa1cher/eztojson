@@ -1,5 +1,6 @@
 package subject;
 
+import com.a6raywa1cher.eztojson.annotation.ETJMethod;
 import com.a6raywa1cher.eztojson.annotation.ShortInfo;
 
 @ShortInfo(getter = "getNumber")
@@ -7,6 +8,11 @@ public class Aviary {
 	private String name;
 	private int number;
 	private Employee[] employees;
+
+	@ETJMethod(name = "gn")
+	public String getGeneralNumber() {
+		return "AVI" + String.format("%1$04d", number);
+	}
 
 	public String getName() {
 		return name;

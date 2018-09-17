@@ -4,6 +4,7 @@ import com.a6raywa1cher.eztojson.adapter.Adapter;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class ETJReference {
 		INCLUDE_TRANSIENT_FIELDS, INCLUDE_TRANSIENT_FIELDS_IN, INCLUDE_NON_JPA_FIELDS, INCLUDE_NON_JPA_FIELDS_IN,
 		PARSE_EMPTY_VALUES, PARSE_EMPTY_VALUES_IN, ALLOW_DUPLICATES, ALLOW_DUPLICATES_IN, ALLOW_DUPLICATES_OF,
 		SCANNING_DEPTH, WHITE_SET_OF_CLASSES, SHORT_ONLY_SET, BLACK_SET_OF_CLASSES, WHITE_SET_OF_METHODS,
-		BLACK_SET_OF_METHODS
+		BLACK_SET_OF_METHODS, ADDITIONAL_METHODS
 	}
 
 	boolean includeTransientFields = false;
@@ -61,6 +62,8 @@ public class ETJReference {
 	Set<Class> whiteSetOfMethodsIn = null;
 	Set<Method> blackSetOfMethods = null;
 	Set<Class> blackSetOfMethodsIn = null;
+
+	Map<Class, Set<AdditionalMethodSetting>> additionalMethods = null;
 
 	public JSONObject process(Object o) {
 		return ETJUtility.process(this, o, scanningDepth);
@@ -166,12 +169,20 @@ public class ETJReference {
 				blackSetOfMethods.add(method1);
 				blackSetOfMethodsIn.add(method1.getDeclaringClass());
 				break;
+			case ADDITIONAL_METHODS:
+				if (additionalMethods == null) additionalMethods = new HashMap<>();
+				AdditionalMethodSetting ams = (AdditionalMethodSetting) o;
+				if (!additionalMethods.containsKey(ams.getMethod().getDeclaringClass())) {
+					additionalMethods.put(ams.getMethod().getDeclaringClass(), new HashSet<>());
+				}
+				additionalMethods.get(ams.getMethod().getDeclaringClass()).add(ams);
+				break;
 		}
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Method getMethod(String str) { //example: models.auth.User.getPassword
+	static Method getMethod(String str) { //example: models.auth.User.getPassword
 		String className = null;
 		String methodName = null;
 		try {

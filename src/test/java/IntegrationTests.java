@@ -1,3 +1,4 @@
+import com.a6raywa1cher.eztojson.AdditionalMethodSetting;
 import com.a6raywa1cher.eztojson.ETJReference;
 import com.a6raywa1cher.eztojson.ETJUtility;
 import com.a6raywa1cher.eztojson.adapter.POJOAdapter;
@@ -95,5 +96,26 @@ public class IntegrationTests {
 		Assert.assertEquals(new JSONArray().put(emp0).put(emp1).toString(), scanning1.optJSONArray("employees").toString());
 	}
 
+	@Test
+	public void methodAnnotationTest() {
+		Aviary aviary = new Aviary();
+		aviary.setNumber(12);
+		JSONObject json = ETJUtility.create(new POJOAdapter())
+				.process(aviary);
+		System.out.println(json.toString());
+		Assert.assertEquals(aviary.getGeneralNumber(), json.optString("gn"));
+	}
 
+	@Test
+	public void additionalMethodTest() {
+		Employee employee = new Employee();
+		employee.setId(1);
+		employee.setFirstName("first");
+		employee.setLastName("last");
+		JSONObject json = ETJUtility.create(new POJOAdapter())//models.auth.User.getPassword
+				.configure(new AdditionalMethodSetting("subject.Employee.getFullName", "trigger"), ETJReference.Properties.ADDITIONAL_METHODS)
+				.process(employee);
+		System.out.println(json);
+		Assert.assertEquals("first last", json.optString("trigger"));
+	}
 }
