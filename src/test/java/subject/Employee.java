@@ -4,6 +4,7 @@ import com.a6raywa1cher.eztojson.annotation.ShortInfo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @ShortInfo(getter = "getId")
 public class Employee {
@@ -13,6 +14,19 @@ public class Employee {
 	private String lastName;
 	private LocalDate birthday;
 	private BigDecimal salary;
+	private List<Zoo> zoos;
+
+	public Employee() {
+	}
+
+	public Employee(Integer id, long passnum, String firstName, String lastName, LocalDate birthday, BigDecimal salary) {
+		this.id = id;
+		this.passnum = passnum;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.birthday = birthday;
+		this.salary = salary;
+	}
 
 	public String getFullName() {
 		return firstName + " " + lastName;
@@ -64,5 +78,13 @@ public class Employee {
 
 	public void setSalary(BigDecimal salary) {
 		this.salary = salary;
+	}
+
+	public List<Zoo> getZoos() {
+		return zoos;
+	}
+
+	public void setZoos(List<Zoo> zoos) {
+		this.zoos = zoos;
 	}
 }

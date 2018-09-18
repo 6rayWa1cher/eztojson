@@ -14,6 +14,14 @@ public class Aviary {
 		return "AVI" + String.format("%1$04d", number);
 	}
 
+	public Aviary(String name, int number) {
+		this.name = name;
+		this.number = number;
+	}
+
+	public Aviary() {
+	}
+
 	public String getName() {
 		return name;
 	}

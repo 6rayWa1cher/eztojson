@@ -12,6 +12,7 @@ import subject.Zoo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class IntegrationTests {
 	@Test
@@ -96,6 +97,34 @@ public class IntegrationTests {
 		Assert.assertEquals(new JSONArray().put(emp0).put(emp1).toString(), scanning1.optJSONArray("employees").toString());
 	}
 
+	@Test
+	public void backScanLockTest() {
+		Zoo zoo1 = new Zoo(), zoo2 = new Zoo();
+		zoo1.setName("first zoo");
+		zoo1.setAddress("trigger");
+		zoo2.setName("second zoo");
+		Employee employee = new Employee();
+		employee.setLastName("the name.");
+		employee.setId(1);
+		employee.setZoos(new ArrayList<>(3));
+		employee.getZoos().add(zoo1);
+		employee.getZoos().add(zoo2);
+		zoo1.setEmployees(new ArrayList<>());
+		zoo1.getEmployees().add(employee);
+		zoo2.setEmployees(new ArrayList<>());
+		zoo2.getEmployees().add(employee);
+		JSONObject jsonObject = ETJUtility.create(new POJOAdapter())
+				.process(zoo1, 9999);
+//		System.out.println(jsonObject.toString(1));
+		Assert.assertEquals(1, jsonObject.toString().split("trigger").length - 1);
+		Assert.assertEquals(1, jsonObject.toString().split("the name").length - 1);
+		jsonObject = ETJUtility.create(new POJOAdapter())
+				.configure(true, ETJReference.Properties.ALLOW_DUPLICATES)
+				.process(zoo1, 2);
+//		System.out.println(jsonObject.toString(1));
+		Assert.assertEquals(2, jsonObject.toString().split("trigger").length - 1);
+		Assert.assertEquals(3, jsonObject.toString().split("1").length - 1);
+	}
 	@Test
 	public void methodAnnotationTest() {
 		Aviary aviary = new Aviary();

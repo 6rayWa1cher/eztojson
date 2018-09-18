@@ -9,6 +9,15 @@ public class Zoo {
 	private String name;
 	private String address;
 	private List<Aviary> aviaries;
+	private List<Employee> employees;
+
+	public Zoo() {
+	}
+
+	public Zoo(String name, String address) {
+		this.name = name;
+		this.address = address;
+	}
 
 	public String getName() {
 		return name;
@@ -28,6 +37,14 @@ public class Zoo {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public List<Employee> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<Employee> employees) {
+		this.employees = employees;
 	}
 
 	public void setAviaries(List<Aviary> aviaries) {

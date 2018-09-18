@@ -25,6 +25,7 @@ public class ETJUtility {
 	static JSONObject process(ETJReference j, Object o, int scanningDepth) {
 		Queue<GeneratorRequest> processRequest = new ArrayDeque<>();
 		Set<Object> callSet = j.allowDuplicates ? null : new HashSet<>();
+		boolean first = true;
 		JSONObject json = new JSONObject();
 		classToStack(processRequest, j, o, json, scanningDepth);
 		while (!processRequest.isEmpty()) {
@@ -40,6 +41,10 @@ public class ETJUtility {
 							!j.nullSafeContains(j.allowDuplicatesIn, request.caller.getClass())) {
 						parseShortly(j, request, request.object);
 						continue;
+					}
+					if (first) {
+						callSet.add(o);
+						first = false;
 					}
 					callSet.add(request.object);
 				}
