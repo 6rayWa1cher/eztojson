@@ -5,6 +5,7 @@ import com.a6raywa1cher.eztojson.adapter.POJOAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import subject.Aviary;
 import subject.Employee;
@@ -13,8 +14,10 @@ import subject.Zoo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class IntegrationTests {
+	Aviary aviaryWithManyEmployees;
 	@Test
 	public void simpleTest() {
 		Zoo zoo = new Zoo();
@@ -146,5 +149,27 @@ public class IntegrationTests {
 				.process(employee);
 		System.out.println(json);
 		Assert.assertEquals("first last", json.optString("trigger"));
+	}
+
+	@Before
+	public void setAviaryWithManyEmployees() throws Exception {
+		Employee[] employees = new Employee[1500];
+		Random random = new Random();
+		for (int i = 0; i < employees.length; i++) {
+			Employee employee = new Employee();
+			employee.setId(random.nextInt(Integer.MAX_VALUE));
+			employee.setPassnum(random.nextLong());
+			employees[i] = employee;
+		}
+		Aviary aviary = new Aviary();
+		aviary.setEmployees(employees);
+		aviary.setName("testname");
+		aviaryWithManyEmployees = aviary;
+	}
+
+	@Test
+	public void multipleObjectsInArrayPerformanceTest() {
+		ETJUtility.create(new POJOAdapter())
+				.process(aviaryWithManyEmployees, 1);
 	}
 }
