@@ -3,6 +3,11 @@ package com.a6raywa1cher.eztojson;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * @author 6raywa1cher
+ * @version 1.0
+ * @since 1.0.0
+ */
 class ClassContainer {
 	FieldContainer shortInfo;
 	Set<FieldContainer> persistenceFields;

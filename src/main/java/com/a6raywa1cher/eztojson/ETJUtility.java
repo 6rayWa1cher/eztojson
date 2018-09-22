@@ -15,6 +15,9 @@ import java.util.*;
 
 public class ETJUtility {
 
+	private ETJUtility() {
+	}
+
 	public static ETJReference create(Adapter adapter) {
 		ETJReference j = new ETJReference();
 		j.classDatabase = ClassDatabase.getInstance().getDatabaseCopy();

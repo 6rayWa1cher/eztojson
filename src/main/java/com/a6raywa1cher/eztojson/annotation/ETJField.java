@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
  * if this field is extraneous or has another blocking modification
  *
  * @author 6rayWa1cher
+ * @version 1.0
+ * @since 1.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

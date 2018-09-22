@@ -5,6 +5,11 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * @author 6raywa1cher
+ * @version 1.0
+ * @since 1.0.0
+ */
 class FieldContainer {
 	enum MethodType {
 		DATA, CLASS, COLLECTION

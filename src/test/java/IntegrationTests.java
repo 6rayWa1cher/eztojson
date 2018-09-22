@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class IntegrationTests {
-	Aviary aviaryWithManyEmployees;
+	private Aviary aviaryWithManyEmployees;
 	@Test
 	public void simpleTest() {
 		Zoo zoo = new Zoo();

@@ -11,8 +11,10 @@ import java.lang.annotation.Target;
  * we have to provide some information about non-primitive object, stored in
  * the variable of the current scanning object
  *
- * @author 6raywa1cher
+ * @author 6rayWa1cher
+ * @version 1.0
  * @see java.lang.annotation.Annotation
+ * @since 1.0.0
  */
 
 @Retention(RetentionPolicy.RUNTIME)

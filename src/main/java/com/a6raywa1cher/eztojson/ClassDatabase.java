@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author 6rayWa1cher
+ * @author 6raywa1cher
+ * @version 1.0
+ * @since 1.0.0
  */
 class ClassDatabase {
 	private static final ClassDatabase cd = new ClassDatabase();

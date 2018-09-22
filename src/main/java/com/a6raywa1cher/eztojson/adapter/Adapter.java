@@ -9,6 +9,8 @@ import java.lang.reflect.Method;
  * have to check ETJField and ShortInfo annotations.
  *
  * @author 6rayWa1cher
+ * @version 1.0
+ * @since 1.0.0
  */
 public interface Adapter {
 	/**

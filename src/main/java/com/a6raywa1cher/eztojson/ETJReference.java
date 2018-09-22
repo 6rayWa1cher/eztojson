@@ -14,29 +14,160 @@ import java.util.Set;
  * ETJUtility.
  * <p>
  * Quick howto:
- * 1) Receive object of ETJReference: ETJUtility.create()
- * 2) Set up necessary parameters: etjReference.configure(Properties, Object),
- * where Object - new value of parameter
- * 3) Using etjReference, parse Java class to JSON:
- * etjReference.process(Object, int),
+ * <ol>
+ * <li>
+ * Receive object of ETJReference: {@link ETJUtility#create(Adapter)}
+ * </li>
+ * <li>
+ * Set up necessary parameters:
+ * {@link ETJReference#configure(Object, Properties)}, where Object - new value
+ * of parameter
+ * </li>
+ * <li>
+ * Using etjReference, parse Java class to JSON:
+ * {@link ETJReference#process(Object, int)},
  * where int is scanning depth. Zero means that only this class will be showed
  * fully in JSONObject, and increasing this value by one you'll get one more
  * layer of scanning.
+ * </li>
+ * </ol>
  *
  * @author 6rayWa1cher
  * @version 1.0
- * @see com.a6raywa1cher.eztojson.ETJUtility
+ * @see ETJUtility
  * @see JSONObject
+ * @since 1.0.0
  */
 public class ETJReference {
 	Map<Class, ClassContainer> classDatabase;
 	Adapter adapter;
 
 	public enum Properties {
-		INCLUDE_TRANSIENT_FIELDS, INCLUDE_TRANSIENT_FIELDS_IN, INCLUDE_EXTRANEOUS_FIELDS, INCLUDE_EXTRANEOUS_FIELDS_IN,
-		PARSE_EMPTY_VALUES, PARSE_EMPTY_VALUES_IN, ALLOW_DUPLICATES, ALLOW_DUPLICATES_IN, ALLOW_DUPLICATES_OF,
-		SCANNING_DEPTH, WHITE_SET_OF_CLASSES, SHORT_ONLY_SET, BLACK_SET_OF_CLASSES, WHITE_SET_OF_METHODS,
-		BLACK_SET_OF_METHODS, ADDITIONAL_METHODS
+		/**
+		 * Activates the parsing of transient fields in all classes.
+		 * <p>
+		 * Object - boolean.
+		 */
+		INCLUDE_TRANSIENT_FIELDS,
+		/**
+		 * Activates the parsing of transient fields in the specific class.
+		 * <p>
+		 * Object - Class.
+		 */
+		INCLUDE_TRANSIENT_FIELDS_IN,
+		/**
+		 * Activates the parsing of extraneous fields in all classes.
+		 * <p>
+		 * Object - boolean.
+		 */
+		INCLUDE_EXTRANEOUS_FIELDS,
+		/**
+		 * Activates the parsing of extraneous fields in the specific class.
+		 * <p>
+		 * Object - Class.
+		 */
+		INCLUDE_EXTRANEOUS_FIELDS_IN,
+		/**
+		 * Activates the parsing of fields with empty values in all classes.
+		 * Empty values will have {@code JSONObject.NULL} as value in JSON.
+		 * <p>
+		 * Object - boolean
+		 */
+		PARSE_EMPTY_VALUES,
+		/**
+		 * Activates the parsing of fields with empty values in the specific
+		 * class.
+		 * The empty values will have {@code JSONObject.NULL} as value in JSON.
+		 * <p>
+		 * Object - Class.
+		 */
+		PARSE_EMPTY_VALUES_IN,
+		/**
+		 * Disables the detection of object duplicates in all classes.
+		 * <p>
+		 * Object - boolean.
+		 */
+		ALLOW_DUPLICATES,
+		/**
+		 * Disables the detection of object duplicates in the specific class.
+		 * <p>
+		 * Object - Class.
+		 */
+		ALLOW_DUPLICATES_IN,
+		/**
+		 * Disables the detection of object duplicates for all object of the
+		 * specific class.
+		 * <p>
+		 * Object - Class.
+		 */
+		ALLOW_DUPLICATES_OF,
+		/**
+		 * Setting default scanning depth for {@link ETJReference#process(Object)}
+		 * <p>
+		 * Object - int, not less than zero.
+		 */
+		SCANNING_DEPTH,
+		/**
+		 * Enables the whitelist rule and appends the class to the list.
+		 * <p>
+		 * The whitelist of classes allows parsing only specific classes.
+		 * All class not included in this list will not parse, also
+		 * short info will not show.
+		 * Not compatible with {@code BLACKLIST_OF_CLASSES}.
+		 * <p>
+		 * Object - Class.
+		 */
+		WHITELIST_OF_CLASSES,
+		/**
+		 * Appending class to the list of classes, which have only short info
+		 * in JSON.
+		 * Other fields of the class will not include.
+		 * <p>
+		 * Object - Class.
+		 */
+		SHORT_ONLY_SET,
+		/**
+		 * Enables the blacklist rule and appends the class to the list.
+		 * <p>
+		 * The blacklist of classes disallows parsing classes in the list.
+		 * No fields of the classes will parse, also short info will not show.
+		 * Not compatible with {@code WHITELIST_OF_CLASSES}.
+		 * <p>
+		 * Object - Class.
+		 */
+		BLACKLIST_OF_CLASSES,
+		/**
+		 * Enables the whitelist of methods and appends the method to the list.
+		 * <p>
+		 * The whitelist of methods allows parsing only specific methods, but
+		 * only if the list specified for the parsing class.
+		 * All methods not included in this list, if the list exists for the class,
+		 * will not parse.
+		 * Not compatible with {@code BLACKLIST_OF_METHODS}, if already specified
+		 * for the class.
+		 * <p>
+		 * Object - String. Example: {@code "models.auth.User.getPassword"}
+		 */
+		WHITELIST_OF_METHODS,
+		/**
+		 * Enables the blacklist of methods and appends the method to the list.
+		 * <p>
+		 * The blacklist of methods disallows parsing of specific methods, but
+		 * only if the list specified for the parsing class.
+		 * All methods included in this list if the list exists for the class,
+		 * will not parse.
+		 * Not compatible with {@code WHITELIST_OF_METHODS}, if already specified
+		 * for the class.
+		 * <p>
+		 * Object - String. Example: {@code "models.auth.User.getPassword"}
+		 */
+		BLACKLIST_OF_METHODS,
+		/**
+		 * Forcibly appends method to be parsed.
+		 * <p>
+		 * Object - {@link AdditionalMethodSetting}.
+		 */
+		ADDITIONAL_METHODS
 	}
 
 	boolean includeTransientFields = false;
@@ -65,10 +196,23 @@ public class ETJReference {
 
 	Map<Class, Set<AdditionalMethodSetting>> additionalMethods = null;
 
+	/**
+	 * Asks ETJUtility to process object with defined in this class settings.
+	 *
+	 * @param o Object to convert to JSONObject
+	 * @return JSONObject of object
+	 */
 	public JSONObject process(Object o) {
 		return ETJUtility.process(this, o, scanningDepth);
 	}
 
+	/**
+	 * Asks ETJUtility to process object with defined in this class settings.
+	 *
+	 * @param o             Object to convert to JSONObject
+	 * @param scanningDepth Scanning depth
+	 * @return JSONObject of object
+	 */
 	public JSONObject process(Object o, int scanningDepth) {
 		return ETJUtility.process(this, o, scanningDepth);
 	}
@@ -83,6 +227,14 @@ public class ETJReference {
 		return !set.contains(obj);
 	}
 
+	/**
+	 * Configures property: replaces saved value or appends value to list.
+	 *
+	 * @param o        Replacement or value to append
+	 * @param property Property to configure
+	 * @return self
+	 * @see ETJReference.Properties
+	 */
 	public ETJReference configure(Object o, Properties property) {
 		switch (property) {
 			case INCLUDE_TRANSIENT_FIELDS:
@@ -131,7 +283,7 @@ public class ETJReference {
 				if (((int) o) < 0) throw new RuntimeException("property SCANNING_DEPTH always greater or equals 0");
 				scanningDepth = (int) o;
 				break;
-			case WHITE_SET_OF_CLASSES:
+			case WHITELIST_OF_CLASSES:
 				if (whiteSetOfClasses == null) {
 					whiteSetOfClasses = new HashSet<>();
 				}
@@ -143,13 +295,13 @@ public class ETJReference {
 				}
 				shortOnlySet.add((Class) o);
 				break;
-			case BLACK_SET_OF_CLASSES:
+			case BLACKLIST_OF_CLASSES:
 				if (blackSetOfClasses == null) {
 					blackSetOfClasses = new HashSet<>();
 				}
 				blackSetOfClasses.add((Class) o);
 				break;
-			case WHITE_SET_OF_METHODS:
+			case WHITELIST_OF_METHODS:
 				if (whiteSetOfMethods == null) whiteSetOfMethods = new HashSet<>();
 				if (whiteSetOfMethodsIn == null) whiteSetOfMethodsIn = new HashSet<>();
 				Method method = getMethod((String) o);
@@ -159,7 +311,7 @@ public class ETJReference {
 				whiteSetOfMethods.add(method);
 				whiteSetOfMethodsIn.add(method.getDeclaringClass());
 				break;
-			case BLACK_SET_OF_METHODS:
+			case BLACKLIST_OF_METHODS:
 				if (blackSetOfMethods == null) blackSetOfMethods = new HashSet<>();
 				if (blackSetOfMethodsIn == null) blackSetOfMethodsIn = new HashSet<>();
 				Method method1 = getMethod((String) o);

@@ -5,6 +5,11 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 
+/**
+ * @author 6raywa1cher
+ * @version 1.0
+ * @since 1.0.0
+ */
 class GeneratorRequest {
 	Object caller;
 	Object object;
