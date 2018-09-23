@@ -6,6 +6,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * Implementation of Adapter for objects with JPA annotations.
+ * <p>
+ * As transient marker, this class uses {@code Transient} annotation.
+ * As identification marker, this class uses {@code Id} annotation.
+ * Extraneous object haven't any javax.persistence annotation.
+ *
+ * @author 6rayWa1cher
+ * @version 1.0
+ * @see com.a6raywa1cher.eztojson.adapter.Adapter
+ * @see javax.persistence.Transient
+ * @see javax.persistence.Id
+ * @since 1.0.0
+ */
 public class JPAAdapter implements Adapter {
 	@Override
 	public boolean isTransient(Field f, Method getter) {

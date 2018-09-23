@@ -13,11 +13,35 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * Java-classes to JSON converter class. How-to in {@link ETJReference}.
+ * <p>
+ * JSON includes two parts: short info and main info.
+ * Short info - also identification info - briefly characterizes the object.
+ * Example: primary keys in a database. Main info - all other fields in the
+ * class. To get info about short/main/extraneous/transient type, ETJUtility
+ * uses {@link Adapter}. Classification made to work primarily with databases
+ * objects.
+ *
+ * @author 6rayWa1cher
+ * @version 1.0
+ * @see ETJReference
+ * @since 1.0.0
+ */
 public class ETJUtility {
 
 	private ETJUtility() {
 	}
 
+	/**
+	 * Generates object of ETJReference. This is starting point.
+	 *
+	 * @param adapter Adapter, suitable for classes which this class will
+	 *                convert after setting up the ETJReference object.
+	 * @return ETJReference object
+	 * @see ETJReference
+	 * @see Adapter
+	 */
 	public static ETJReference create(Adapter adapter) {
 		ETJReference j = new ETJReference();
 		j.classDatabase = ClassDatabase.getInstance().getDatabaseCopy();
@@ -134,6 +158,7 @@ public class ETJUtility {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static ClassContainer checkClass(ETJReference j, Class c) {
 		ClassContainer classContainer;
 		if ((classContainer = j.classDatabase.getOrDefault(c, null)) != null) {
