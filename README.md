@@ -12,3 +12,14 @@ layer of scanning.
 where Object - new value of parameter
 4. Using etjReference, parse Java class to JSON: `etjReference.process(Object, int)`,
 where int is scanning depth. 
+
+# Download
+Maven dependency:
+```
+<dependency>
+  <groupId>com.a6raywa1cher</groupId>
+  <artifactId>eztojson</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+Jar file also in releases tab. In this case, you need to download https://github.com/stleary/JSON-java too.
