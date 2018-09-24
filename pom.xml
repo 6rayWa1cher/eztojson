@@ -4,9 +4,43 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.a6rayWa1cher</groupId>
+    <groupId>com.a6raywa1cher</groupId>
     <artifactId>eztojson</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Java-classes to JSON converter for use during development</description>
+    <url>https://github.com/6rayWa1cher/eztojson</url>
+
+    <developers>
+        <developer>
+            <name>Konstantin Grigorev</name>
+            <email>info@a6raywa1cher.com</email>
+            <organizationUrl>http://a6raywa1cher.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/6rayWa1cher/eztojson.git</connection>
+        <developerConnection>scm:git:ssh://github.com:6rayWa1cher/eztojson.git</developerConnection>
+        <url>https://github.com/6rayWa1cher/eztojson/tree/master</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -18,23 +52,56 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
-
-    <url>https://github.com/6rayWa1cher/eztojson</url>
-
-    <name>EzToJson</name>
-    <description>Java-classes to JSON converter for use during development</description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://github.com/6rayWa1cher/eztojson/blob/master/LICENSE</url>
-        </license>
-    </licenses>
-    <scm>
-        <url>https://github.com/6rayWa1cher/eztojson.git</url>
-    </scm>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
@@ -58,7 +125,5 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 </project>
