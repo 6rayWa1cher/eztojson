@@ -1,5 +1,6 @@
 package com.a6raywa1cher.eztojson.adapter;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import java.lang.annotation.Annotation;
@@ -14,13 +15,14 @@ import java.lang.reflect.Method;
  * Extraneous object haven't any javax.persistence annotation.
  *
  * @author 6rayWa1cher
- * @version 1.0
+ * @version 1.1
  * @see com.a6raywa1cher.eztojson.adapter.Adapter
  * @see javax.persistence.Transient
  * @see javax.persistence.Id
  * @since 1.0.0
  */
 public class JPAAdapter implements Adapter {
+
 	@Override
 	public boolean isTransient(Field f, Method getter) {
 		return f.isAnnotationPresent(Transient.class) || getter.isAnnotationPresent(Transient.class);
@@ -40,5 +42,10 @@ public class JPAAdapter implements Adapter {
 			if (annotation.toString().startsWith("@javax.persistence")) return false;
 		}
 		return true;
+	}
+
+	@Override
+	public boolean isShortOnly(Class clazz) {
+		return !clazz.isAnnotationPresent(Entity.class);
 	}
 }

@@ -1,7 +1,9 @@
 import com.a6raywa1cher.eztojson.AdditionalMethodSetting;
 import com.a6raywa1cher.eztojson.ETJReference;
 import com.a6raywa1cher.eztojson.ETJUtility;
+import com.a6raywa1cher.eztojson.adapter.JPAAdapter;
 import com.a6raywa1cher.eztojson.adapter.POJOAdapter;
+import com.a6raywa1cher.eztojson.annotation.ShortInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -13,6 +15,7 @@ import subject.Zoo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -171,5 +174,100 @@ public class IntegrationTests {
 	public void multipleObjectsInArrayPerformanceTest() {
 		ETJUtility.create(new POJOAdapter())
 				.process(aviaryWithManyEmployees, 1);
+	}
+
+	@Test
+	public void whiteBlackListsTest() {
+		JSONObject jsonObject1 = ETJUtility.create(new POJOAdapter())
+				.configure(Employee.class, ETJReference.Properties.BLACKLIST_OF_CLASSES)
+				.process(aviaryWithManyEmployees, 2);
+		Assert.assertFalse(jsonObject1.toString().contains(aviaryWithManyEmployees.getEmployees()[0].getId().toString()));
+
+		JSONObject jsonObject2 = ETJUtility.create(new POJOAdapter())
+				.configure(Aviary.class, ETJReference.Properties.WHITELIST_OF_CLASSES)
+				.process(aviaryWithManyEmployees, 2);
+		Assert.assertFalse(jsonObject2.toString().contains(aviaryWithManyEmployees.getEmployees()[0].getId().toString()));
+		Assert.assertEquals("testname", jsonObject2.optString("name"));
+
+		JSONObject jsonObject3 = ETJUtility.create(new POJOAdapter())
+				.configure(Aviary.class, ETJReference.Properties.BLACKLIST_OF_CLASSES)
+				.process(aviaryWithManyEmployees, 2);
+		Assert.assertEquals("{}", jsonObject3.toString());
+
+		JSONObject jsonObject4 = ETJUtility.create(new POJOAdapter())
+				.configure("subject.Aviary.getEmployees", ETJReference.Properties.BLACKLIST_OF_METHODS)
+				.process(aviaryWithManyEmployees, 2);
+		Assert.assertFalse(jsonObject4.toString().contains(aviaryWithManyEmployees.getEmployees()[0].getId().toString()));
+		Assert.assertEquals("testname", jsonObject4.optString("name"));
+
+		JSONObject jsonObject5 = ETJUtility.create(new POJOAdapter())
+				.configure("subject.Aviary.getGeneralNumber", ETJReference.Properties.WHITELIST_OF_METHODS)
+				.configure("subject.Aviary.getEmployees", ETJReference.Properties.WHITELIST_OF_METHODS)
+				.configure("subject.Employee.getId", ETJReference.Properties.WHITELIST_OF_METHODS)
+				.process(aviaryWithManyEmployees, 2);
+		Assert.assertFalse(jsonObject5.has("name"));
+		Assert.assertTrue(jsonObject5.has("gn"));
+		Assert.assertTrue(jsonObject5.has("employees"));
+		JSONArray jsonArray5 = jsonObject5.optJSONArray("employees");
+		Assert.assertEquals(1500, jsonArray5.length());
+		Assert.assertTrue(((JSONObject) jsonArray5.get(0)).has("id"));
+		Assert.assertFalse(((JSONObject) jsonArray5.get(0)).has("passnum"));
+	}
+
+	@Test
+	public void emptyObjectsInArrayBugTest() {
+		JSONObject jsonObject1 = ETJUtility.create(new POJOAdapter())
+				.configure(Employee.class, ETJReference.Properties.BLACKLIST_OF_CLASSES)
+				.process(aviaryWithManyEmployees, 2);
+		System.out.println(jsonObject1);
+		Assert.assertFalse(jsonObject1.toString().contains("{}"));
+	}
+
+	@Test
+	public void unknownObjectsAndLocalClassesTest() {
+		@ShortInfo(getter = "getId")
+		class LocalClass {
+			int id;
+			LocalDate localDate;
+
+			public int getId() {
+				return id;
+			}
+
+			public void setId(int id) {
+				this.id = id;
+			}
+
+			public LocalDate getLocalDate() {
+				return localDate;
+			}
+
+			public void setLocalDate(LocalDate localDate) {
+				this.localDate = localDate;
+			}
+		}
+		LocalDate localDate = LocalDate.now();
+		LocalClass localclass = new LocalClass();
+		localclass.setLocalDate(localDate);
+		JSONObject jsonObject = ETJUtility.create(new POJOAdapter())
+//				.configure(LocalDate.class, ETJReference.Properties.SHORT_ONLY_SET)
+				.process(localclass, 22);
+		Assert.assertEquals(localDate.toString(), jsonObject.opt("localDate").toString());
+	}
+
+	@Test
+	public void jpaSimpleTest() {
+		LocalDateTime localDateTime = LocalDateTime.now();
+		JPAUser user = new JPAUser();
+		user.setId(14L);
+		user.setLogin("login");
+		user.setPassword("qwerty");
+		user.setLastLogin(localDateTime);
+		JSONObject jsonObject = ETJUtility.create(new JPAAdapter())
+				.process(user, 1);
+		System.out.println(jsonObject);
+		Assert.assertEquals(14L, jsonObject.optInt("id"));
+		Assert.assertEquals("qwerty", jsonObject.optString("password"));
+		Assert.assertEquals(localDateTime.toString(), jsonObject.opt("lastLogin").toString());
 	}
 }

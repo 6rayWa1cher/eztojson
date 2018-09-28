@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
  * have to check ETJField and ShortInfo annotations.
  *
  * @author 6rayWa1cher
- * @version 1.0
+ * @version 1.1
  * @since 1.0.0
  */
 public interface Adapter {
@@ -48,4 +48,7 @@ public interface Adapter {
 	 * @return is this field extraneous (true - extraneous)
 	 */
 	boolean isExtraneous(Field f, Method getter);
+
+	//TODO: documentation
+	boolean isShortOnly(Class clazz);
 }

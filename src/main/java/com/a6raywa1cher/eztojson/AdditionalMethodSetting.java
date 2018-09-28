@@ -7,7 +7,7 @@ import static com.a6raywa1cher.eztojson.ETJUtility.unGet;
 /**
  * This class using as info to set up ADDITIONAL_METHODS.
  *
- * @author 6raywa1cher
+ * @author 6rayWa1cher
  * @version 1.0
  * @see com.a6raywa1cher.eztojson.ETJReference.Properties
  * @since 1.0.0

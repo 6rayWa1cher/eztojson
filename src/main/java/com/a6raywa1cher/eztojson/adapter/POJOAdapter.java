@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  * {@link com.a6raywa1cher.eztojson.ETJReference.Properties#BLACKLIST_OF_METHODS}.
  *
  * @author 6rayWa1cher
- * @version 1.0
+ * @version 1.1
  * @see com.a6raywa1cher.eztojson.adapter.Adapter
  * @see com.a6raywa1cher.eztojson.ETJReference
  * @since 1.0.0
@@ -34,5 +34,10 @@ public class POJOAdapter implements Adapter {
 	@Override
 	public boolean isExtraneous(Field f, Method getter) {
 		return false;
+	}
+
+	@Override
+	public boolean isShortOnly(Class clazz) {
+		return clazz.getName().startsWith("java.");
 	}
 }

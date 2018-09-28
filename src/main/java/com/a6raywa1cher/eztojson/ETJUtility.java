@@ -24,7 +24,7 @@ import java.util.*;
  * objects.
  *
  * @author 6rayWa1cher
- * @version 1.0
+ * @version 1.1
  * @see ETJReference
  * @since 1.0.0
  */
@@ -44,8 +44,9 @@ public class ETJUtility {
 	 */
 	public static ETJReference create(Adapter adapter) {
 		ETJReference j = new ETJReference();
-		j.classDatabase = ClassDatabase.getInstance().getDatabaseCopy();
 		j.adapter = adapter;
+		ClassDatabaseEntry classDatabaseEntry = ClassDatabase.getInstance(j.adapter.getClass());
+		j.classDatabase = classDatabaseEntry.getDatabaseCopy();
 		return j;
 	}
 
@@ -83,8 +84,7 @@ public class ETJUtility {
 				FieldContainer.MethodType methodType = request.objectDescription != null ?
 						request.objectDescription.methodType : getType(request.object.getClass());
 
-				if (!j.classDatabase.containsKey(request.object.getClass()) &&
-						checkClass(j, request.object.getClass()) == null) {
+				if (checkClass(j, request.object.getClass()) == null) {
 					methodType = FieldContainer.MethodType.DATA; //toString, if we don't know this class
 				}
 				switch (methodType) {
@@ -94,8 +94,10 @@ public class ETJUtility {
 					case CLASS:
 						if (request.remainingScanningDepth > 0) {
 							JSONObject jsonObject = new JSONObject();
-							classToStack(processRequest, j, request.object, jsonObject, request.remainingScanningDepth - 1);
-							pullTo(request.objectDescription != null ? request.objectDescription.fieldName : "", jsonObject, request);
+							long entriesO = classToStack(processRequest, j, request.object, jsonObject, request.remainingScanningDepth - 1);
+							if (entriesO != 0) {
+								pullTo(request.objectDescription != null ? request.objectDescription.fieldName : "", jsonObject, request);
+							}
 						} else {
 							parseShortly(j, request, request.object);
 						}
@@ -107,8 +109,10 @@ public class ETJUtility {
 //                        }
 						if (request.remainingScanningDepth > 0) {
 							JSONArray jsonArray = new JSONArray();
-							classToStack(processRequest, j, request.object, jsonArray, request.remainingScanningDepth);
-							pullTo(request.objectDescription != null ? request.objectDescription.fieldName : "", jsonArray, request);
+							long entriesA = classToStack(processRequest, j, request.object, jsonArray, request.remainingScanningDepth);
+							if (entriesA != 0) {
+								pullTo(request.objectDescription != null ? request.objectDescription.fieldName : "", jsonArray, request);
+							}
 						} else {
 							parseShortly(j, request, request.object);
 						}
@@ -165,6 +169,12 @@ public class ETJUtility {
 			if (classContainer.persistenceFields == null) return null;
 			else return classContainer;
 		}
+		if (j.adapter.isShortOnly(c)) {
+			classContainer = new ClassContainer(c);
+			ClassDatabase.getInstance(j.adapter.getClass()).updateDatabase(classContainer);
+			j.classDatabase.put(c, classContainer);
+			return null;
+		}
 		Field[] fields;
 		do {
 			fields = c.getDeclaredFields();
@@ -192,6 +202,9 @@ public class ETJUtility {
 				boolean jsonGenColumnAnnotated = f.isAnnotationPresent(ETJField.class) || getter.isAnnotationPresent(ETJField.class);
 				Class returnType = getter.getReturnType();
 				FieldContainer.MethodType type = getType(returnType);
+				if (shortInfo != null && shortInfo.getter.equals(getter)) {
+					continue;
+				}
 				if (shortInfo == null && j.adapter.isIdentification(f, getter)) {
 					shortInfo = new FieldContainer(f.getName(), getter, returnType, type, annotations,
 							false, true, jsonGenColumnAnnotated);
@@ -222,7 +235,7 @@ public class ETJUtility {
 		} else {
 			classContainer = new ClassContainer(shortInfo, persistenceFields, otherFields, c);
 		}
-		ClassDatabase.getInstance().updateDatabase(classContainer);
+		ClassDatabase.getInstance(j.adapter.getClass()).updateDatabase(classContainer);
 		j.classDatabase.put(c, classContainer);
 		if (classContainer.persistenceFields != null) {
 			return classContainer;
@@ -254,14 +267,14 @@ public class ETJUtility {
 		}
 	}
 
-	private static void classToStack(Queue<GeneratorRequest> stack, ETJReference j, Object o, Object json,
+	private static long classToStack(Queue<GeneratorRequest> stack, ETJReference j, Object o, Object json,
 	                                 int remainingScanningDepth) {
 		Class cl = o.getClass();
 		ClassContainer classContainer = checkClass(j, cl);
-		if (classContainer == null) return;
-		if (j.nullSafeNotContains(j.whiteSetOfClasses, cl)) return;
-		if (j.nullSafeContains(j.blackSetOfClasses, cl)) return;
-		if (remainingScanningDepth < 0) return;
+		if (classContainer == null) return 0;
+		if (j.nullSafeNotContains(j.whiteSetOfClasses, cl)) return 0;
+		if (j.nullSafeContains(j.blackSetOfClasses, cl)) return 0;
+		if (remainingScanningDepth < 0) return 0;
 		Set<FieldContainer> set = new HashSet<>(classContainer.persistenceFields);
 		set.addAll(classContainer.otherFields);
 		set.add(classContainer.shortInfo);
@@ -293,6 +306,7 @@ public class ETJUtility {
 					if (whiteCheck && j.nullSafeNotContains(j.whiteSetOfMethods, fieldContainer.getter)) continue;
 					if (blackCheck && j.nullSafeContains(j.blackSetOfMethods, fieldContainer.getter)) continue;
 				}
+				fieldContainer.getter.setAccessible(true); //local classes
 				switch (fieldContainer.methodType) {
 					case DATA:
 					case CLASS:
@@ -331,6 +345,7 @@ public class ETJUtility {
 
 			}
 		}
+		return stack.size();
 	}
 
 	private static GeneratorRequest createGeneratorRequest(Object caller, Object object, FieldContainer objectDescription, Object json,

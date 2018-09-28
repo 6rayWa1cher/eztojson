@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.util.Objects;
 
 /**
- * @author 6raywa1cher
+ * @author 6rayWa1cher
  * @version 1.0
  * @since 1.0.0
  */
