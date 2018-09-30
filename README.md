@@ -108,7 +108,7 @@ These properties operate only within this object of ETJReference.
     ETJReference etjReference = ETJUtility.create(new POJOAdapter())
     				.configure(2, ETJReference.Properties.SCANNING_DEPTH);
     JSONObject json1 = etjReference.process(aviary1);
-    JSONObject json2 = etjReference.process(aviart2);
+    JSONObject json2 = etjReference.process(aviary2);
     ```
 *   `INCLUDE_TRANSIENT_FIELDS`, `INCLUDE_TRANSIENT_FIELDS_IN`  
     Properties activates the parsing of transient fields. Transient field means that this field doesn't provide 
