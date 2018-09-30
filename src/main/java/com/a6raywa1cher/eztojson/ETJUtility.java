@@ -306,46 +306,54 @@ public class ETJUtility {
 					if (whiteCheck && j.nullSafeNotContains(j.whiteSetOfMethods, fieldContainer.getter)) continue;
 					if (blackCheck && j.nullSafeContains(j.blackSetOfMethods, fieldContainer.getter)) continue;
 				}
-				fieldContainer.getter.setAccessible(true); //local classes
-				switch (fieldContainer.methodType) {
-					case DATA:
-					case CLASS:
-						Object o1 = fieldContainer.getter.invoke(o);
-						stack.add(createGeneratorRequest(o, o1, fieldContainer, json, remainingScanningDepth));
-						break;
-					case COLLECTION:
-						Collection collection;
-						if (fieldContainer.getter.getReturnType().isArray()) {
-							collection = new ArrayList();
-							Object[] arr = (Object[]) fieldContainer.getter.invoke(o);
-							Collections.addAll(collection, arr);
-						} else collection = (Collection) fieldContainer.getter.invoke(o);
-						if ((collection == null || collection.size() == 0) && (j.parseEmptyValues || j.nullSafeContains(j.parseEmptyValuesIn, cl))) {
-							if (json instanceof JSONArray) {
-								((JSONArray) json).put(Collections.emptyList());
-							} else {
-								((JSONObject) json).put(fieldContainer.fieldName, Collections.emptyList());
-							}
-							continue;
-						} else if (collection.size() == 0) continue;
-						FieldContainer.MethodType methodType = null;
-						JSONArray jsonArray = new JSONArray();
-						for (Object objectOfCollection : collection) {
-							if (methodType == null) methodType = getType(objectOfCollection.getClass());
-							stack.add(createGeneratorRequest(o, objectOfCollection, null, jsonArray, remainingScanningDepth));
-						}
-						if (json instanceof JSONArray) {
-							((JSONArray) json).put(jsonArray);
-						} else {
-							((JSONObject) json).put(remainingScanningDepth == 0 && methodType == FieldContainer.MethodType.CLASS ?
-									fieldContainer.fieldName + "Ids" : fieldContainer.fieldName, jsonArray);
-						}
-				}
+				fieldToStack(fieldContainer, j, o, json, remainingScanningDepth, stack);
 			} catch (Exception ignored) {
 
 			}
 		}
 		return stack.size();
+	}
+
+	private static void fieldToStack(FieldContainer fieldContainer, ETJReference j, Object o, Object json,
+	                                 int remainingScanningDepth, Queue<GeneratorRequest> stack)
+			throws IllegalAccessException, InvocationTargetException {
+		Class cl = o.getClass();
+		fieldContainer.getter.setAccessible(true); //local classes
+		switch (fieldContainer.methodType) {
+			case DATA:
+			case CLASS:
+				Object o1 = fieldContainer.getter.invoke(o);
+				stack.add(createGeneratorRequest(o, o1, fieldContainer, json, remainingScanningDepth));
+				break;
+			case COLLECTION:
+				Collection collection;
+				if (fieldContainer.getter.getReturnType().isArray()) {
+					collection = new ArrayList();
+					Object[] arr = (Object[]) fieldContainer.getter.invoke(o);
+					Collections.addAll(collection, arr);
+				} else collection = (Collection) fieldContainer.getter.invoke(o);
+				if ((collection == null || collection.size() == 0) && (j.parseEmptyValues || j.nullSafeContains(j.parseEmptyValuesIn, cl))) {
+					if (json instanceof JSONArray) {
+						((JSONArray) json).put(Collections.emptyList());
+					} else {
+						((JSONObject) json).put(fieldContainer.fieldName, Collections.emptyList());
+					}
+					break;
+				} else if (collection.size() == 0) break;
+				FieldContainer.MethodType methodType = null;
+				JSONArray jsonArray = new JSONArray();
+				for (Object objectOfCollection : collection) {
+					if (methodType == null) methodType = getType(objectOfCollection.getClass());
+					stack.add(createGeneratorRequest(o, objectOfCollection, null, jsonArray, remainingScanningDepth));
+				}
+				if (json instanceof JSONArray) {
+					((JSONArray) json).put(jsonArray);
+				} else {
+					((JSONObject) json).put(remainingScanningDepth == 0 && methodType == FieldContainer.MethodType.CLASS ?
+							fieldContainer.fieldName + "Ids" : fieldContainer.fieldName, jsonArray);
+				}
+				break;
+		}
 	}
 
 	private static GeneratorRequest createGeneratorRequest(Object caller, Object object, FieldContainer objectDescription, Object json,

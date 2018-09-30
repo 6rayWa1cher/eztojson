@@ -9,11 +9,12 @@ import java.lang.annotation.Target;
  * Annotation ShortInfo used as a pointer to getter, which can provide short
  * info about this object. It's using when current scanning depth equals 0, but
  * we have to provide some information about non-primitive object, stored in
- * the variable of the current scanning object
+ * the variable of the current scanning object.
  *
  * @author 6rayWa1cher
  * @version 1.0
  * @see java.lang.annotation.Annotation
+ * @see com.a6raywa1cher.eztojson.ETJUtility
  * @since 1.0.0
  */
 

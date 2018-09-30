@@ -155,7 +155,7 @@ public class IntegrationTests {
 	}
 
 	@Before
-	public void setAviaryWithManyEmployees() throws Exception {
+	public void setAviaryWithManyEmployees() {
 		Employee[] employees = new Employee[1500];
 		Random random = new Random();
 		for (int i = 0; i < employees.length; i++) {
@@ -168,12 +168,6 @@ public class IntegrationTests {
 		aviary.setEmployees(employees);
 		aviary.setName("testname");
 		aviaryWithManyEmployees = aviary;
-	}
-
-	@Test
-	public void multipleObjectsInArrayPerformanceTest() {
-		ETJUtility.create(new POJOAdapter())
-				.process(aviaryWithManyEmployees, 1);
 	}
 
 	@Test
@@ -225,10 +219,11 @@ public class IntegrationTests {
 
 	@Test
 	public void unknownObjectsAndLocalClassesTest() {
+		@SuppressWarnings("unused")
 		@ShortInfo(getter = "getId")
 		class LocalClass {
-			int id;
-			LocalDate localDate;
+			private int id;
+			private LocalDate localDate;
 
 			public int getId() {
 				return id;
@@ -242,7 +237,7 @@ public class IntegrationTests {
 				return localDate;
 			}
 
-			public void setLocalDate(LocalDate localDate) {
+			private void setLocalDate(LocalDate localDate) {
 				this.localDate = localDate;
 			}
 		}
@@ -269,5 +264,14 @@ public class IntegrationTests {
 		Assert.assertEquals(14L, jsonObject.optInt("id"));
 		Assert.assertEquals("qwerty", jsonObject.optString("password"));
 		Assert.assertEquals(localDateTime.toString(), jsonObject.opt("lastLogin").toString());
+	}
+
+	@Test
+	public void shortOnlyTest() {
+		JSONObject jsonObject1 = ETJUtility.create(new POJOAdapter())
+				.configure(Employee.class, ETJReference.Properties.SHORT_ONLY_SET)
+				.process(aviaryWithManyEmployees, 2);
+		System.out.println(jsonObject1);
+		Assert.assertFalse(jsonObject1.toString().contains("passnum"));
 	}
 }
