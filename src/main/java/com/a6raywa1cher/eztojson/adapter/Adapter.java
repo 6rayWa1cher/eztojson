@@ -49,6 +49,12 @@ public interface Adapter {
 	 */
 	boolean isExtraneous(Field f, Method getter);
 
-	//TODO: documentation
+	/**
+	 * This method tells if this object can be parsing only shortly. It can be
+	 * Java classes, for example, LocalDate.
+	 *
+	 * @param clazz Class to be analyzed
+	 * @return is this class can be parsing only shortly?
+	 */
 	boolean isShortOnly(Class clazz);
 }

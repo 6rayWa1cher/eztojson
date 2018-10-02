@@ -1,4 +1,6 @@
 # EzToJson
+[![Build Status](https://semaphoreci.com/api/v1/6raywa1cher/eztojson/branches/master/shields_badge.svg)](https://semaphoreci.com/6raywa1cher/eztojson)
+
 Java-classes to JSON converter for use during development.  
 
 Main feature - scanning depth. Zero means that only this class will be showed
@@ -11,7 +13,7 @@ Maven dependency:
 <dependency>
   <groupId>com.a6raywa1cher</groupId>
   <artifactId>eztojson</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 Jar file also in releases tab. In this case, you need to download https://github.com/stleary/JSON-java too.

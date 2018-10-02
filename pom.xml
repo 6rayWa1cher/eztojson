@@ -6,7 +6,7 @@
 
     <groupId>com.a6raywa1cher</groupId>
     <artifactId>eztojson</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SHAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -100,9 +100,20 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>${runSuite}</include>
+                    </includes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
+    <properties>
+        <runSuite>**/IntegrationTests.class</runSuite>
+    </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
