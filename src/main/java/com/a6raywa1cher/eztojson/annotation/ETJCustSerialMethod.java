@@ -13,12 +13,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ETJCustSerialMethod {
-    /**
-     * This field contains a name of the getter, used for getting JSONObject
-     * about scanning object.
-     * Examples: "toJSONObject"
-     *
-     * @return name of getter for getting JSONObject
-     */
-    String getter() default "";
+	/**
+	 * This field contains a name of the getter, used for getting JSONObject
+	 * about scanning object.
+	 * Examples: "toJSONObject"
+	 *
+	 * @return name of getter for getting JSONObject
+	 */
+	String getter() default "";
 }

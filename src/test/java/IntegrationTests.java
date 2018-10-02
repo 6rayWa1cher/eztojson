@@ -19,6 +19,7 @@ import java.util.Random;
 
 public class IntegrationTests {
 	private Aviary aviaryWithManyEmployees;
+
 	@Test
 	public void simpleTest() {
 		Zoo zoo = new Zoo();
@@ -129,6 +130,7 @@ public class IntegrationTests {
 		Assert.assertEquals(2, jsonObject.toString().split("trigger").length - 1);
 		Assert.assertEquals(3, jsonObject.toString().split("1").length - 1);
 	}
+
 	@Test
 	public void methodAnnotationTest() {
 		Aviary aviary = new Aviary();
@@ -169,6 +171,7 @@ public class IntegrationTests {
 		Assert.assertEquals("first last", json.optString("trigger"));
 */
 	}
+
 	@Before
 	public void setAviaryWithManyEmployees() {
 		Employee[] employees = new Employee[1500];
