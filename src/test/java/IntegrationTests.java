@@ -9,9 +9,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import subject.Aviary;
-import subject.Employee;
-import subject.Zoo;
+import subject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +19,7 @@ import java.util.Random;
 
 public class IntegrationTests {
 	private Aviary aviaryWithManyEmployees;
+
 	@Test
 	public void simpleTest() {
 		Zoo zoo = new Zoo();
@@ -131,6 +130,7 @@ public class IntegrationTests {
 		Assert.assertEquals(2, jsonObject.toString().split("trigger").length - 1);
 		Assert.assertEquals(3, jsonObject.toString().split("1").length - 1);
 	}
+
 	@Test
 	public void methodAnnotationTest() {
 		Aviary aviary = new Aviary();
@@ -152,6 +152,24 @@ public class IntegrationTests {
 				.process(employee);
 		System.out.println(json);
 		Assert.assertEquals("first last", json.optString("trigger"));
+	}
+
+
+	@Test
+	public void customSerialMethodTest() {
+		Person person = new Person();
+		person.setAge(20);
+		person.setName("Alexander");
+
+		Plane plane = new Plane();
+		plane.getPersonList().add(person);
+
+		JSONObject json = ETJUtility.create(new POJOAdapter())
+				.process(plane, 100);
+		System.out.println(json);
+/*
+		Assert.assertEquals("first last", json.optString("trigger"));
+*/
 	}
 
 	@Before

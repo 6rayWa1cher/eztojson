@@ -1,5 +1,6 @@
 package com.a6raywa1cher.eztojson;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,20 +14,23 @@ class ClassContainer {
 	Set<FieldContainer> persistenceFields;
 	Set<FieldContainer> otherFields;
 	Class aClass;
+	Method customSerializeMethod;
 
 	ClassContainer(Class aClass) {
 		this.shortInfo = null;
 		this.persistenceFields = null;
 		this.otherFields = null;
 		this.aClass = aClass;
+		this.customSerializeMethod = null;
 	}
 
 	ClassContainer(FieldContainer shortInfo, Set<FieldContainer> persistenceFields,
-	               Set<FieldContainer> otherFields, Class aClass) {
+				   Set<FieldContainer> otherFields, Class aClass, Method customSerializeMethod) {
 		this.shortInfo = shortInfo;
 		this.persistenceFields = persistenceFields;
 		this.otherFields = otherFields;
 		this.aClass = aClass;
+		this.customSerializeMethod = customSerializeMethod;
 	}
 
 	@Override
@@ -37,12 +41,13 @@ class ClassContainer {
 		return Objects.equals(shortInfo, that.shortInfo) &&
 				Objects.equals(persistenceFields, that.persistenceFields) &&
 				Objects.equals(otherFields, that.otherFields) &&
-				Objects.equals(aClass, that.aClass);
+				Objects.equals(aClass, that.aClass) &&
+				Objects.equals(customSerializeMethod, that.customSerializeMethod);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(shortInfo, persistenceFields, otherFields, aClass);
+		return Objects.hash(shortInfo, persistenceFields, otherFields, aClass, customSerializeMethod);
 	}
 }

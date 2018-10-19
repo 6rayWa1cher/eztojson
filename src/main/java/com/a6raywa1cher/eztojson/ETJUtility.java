@@ -1,6 +1,7 @@
 package com.a6raywa1cher.eztojson;
 
 import com.a6raywa1cher.eztojson.adapter.Adapter;
+import com.a6raywa1cher.eztojson.annotation.ETJCustSerialMethod;
 import com.a6raywa1cher.eztojson.annotation.ETJField;
 import com.a6raywa1cher.eztojson.annotation.ETJMethod;
 import com.a6raywa1cher.eztojson.annotation.ShortInfo;
@@ -87,12 +88,22 @@ public class ETJUtility {
 				if (checkClass(j, request.object.getClass()) == null) {
 					methodType = FieldContainer.MethodType.DATA; //toString, if we don't know this class
 				}
+
+				ClassContainer classContainer = j.classDatabase.get(request.object.getClass());
+				if (classContainer == null) {
+					classContainer = checkClass(j, request.object.getClass());
+				}
+
 				switch (methodType) {
+
+
 					case DATA:
 						pullTo(request.objectDescription != null ? request.objectDescription.fieldName : "", request.object, request);
 						break;
 					case CLASS:
-						if (request.remainingScanningDepth > 0) {
+						if (classContainer != null && classContainer.customSerializeMethod != null) {
+							parseUsingCustomMethod(j, request, request.object);
+						} else if (request.remainingScanningDepth > 0) {
 							JSONObject jsonObject = new JSONObject();
 							long entriesO = classToStack(processRequest, j, request.object, jsonObject, request.remainingScanningDepth - 1);
 							if (entriesO != 0) {
@@ -103,11 +114,9 @@ public class ETJUtility {
 						}
 						break;
 					case COLLECTION:
-//                        if(((List) request.object).size() == 0){
-//                            parseNull(j, request);
-//                            continue;
-//                        }
-						if (request.remainingScanningDepth > 0) {
+						if (classContainer != null && classContainer.customSerializeMethod != null) {
+							parseUsingCustomMethod(j, request, request.object);
+						} else if (request.remainingScanningDepth > 0) {
 							JSONArray jsonArray = new JSONArray();
 							long entriesA = classToStack(processRequest, j, request.object, jsonArray, request.remainingScanningDepth);
 							if (entriesA != 0) {
@@ -137,6 +146,30 @@ public class ETJUtility {
 			pullTo(
 					shortInfo.fieldName.equals("id") ? Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1) + "Id" : shortInfo.fieldName,
 					shortInfo.getter.invoke(o),
+					request
+			);
+		} else {
+			pullTo(
+					request.objectDescription != null ? request.objectDescription.fieldName : "",
+					request.object,
+					request
+			);
+		}
+	}
+
+	private static void parseUsingCustomMethod(ETJReference j, GeneratorRequest request, Object o) throws IllegalAccessException, InvocationTargetException {
+		Method customMethod;
+		ClassContainer classContainer = j.classDatabase.get(o.getClass());
+		if (classContainer == null) {
+			classContainer = checkClass(j, o.getClass());
+		}
+
+		if (classContainer != null && classContainer.persistenceFields != null && classContainer.customSerializeMethod != null) {
+			customMethod = classContainer.customSerializeMethod;
+			String simpleName = request.objectDescription != null ? unGet(request.objectDescription.getter.getName()) : o.getClass().getSimpleName();
+			pullTo(
+					Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1),
+					customMethod.invoke(o),
 					request
 			);
 		} else {
@@ -180,8 +213,16 @@ public class ETJUtility {
 			fields = c.getDeclaredFields();
 		} while (fields.length == 0);
 		FieldContainer shortInfo = null;
+		Method customSerializeMethod = null;
+
 		try {
 			ShortInfo anno = (ShortInfo) c.getAnnotation(ShortInfo.class);
+			ETJCustSerialMethod etjCustSerialMethod = (ETJCustSerialMethod) c.getAnnotation(ETJCustSerialMethod.class);
+
+			if (etjCustSerialMethod != null) {
+				customSerializeMethod = c.getMethod(etjCustSerialMethod.getter());
+			}
+
 			Method shortInfoGetter = c.getMethod(anno.getter());
 			Class returnClass = shortInfoGetter.getReturnType();
 			shortInfo = new FieldContainer(anno.name().equals("") ? unGet(shortInfoGetter.getName()) : anno.name(),
@@ -230,10 +271,10 @@ public class ETJUtility {
 						false, true, true));
 			}
 		}
-		if (otherFields.size() == 0 && persistenceFields.size() == 0 && shortInfo == null) {
+		if (otherFields.size() == 0 && persistenceFields.size() == 0 && shortInfo == null && customSerializeMethod == null) {
 			classContainer = new ClassContainer(c);
 		} else {
-			classContainer = new ClassContainer(shortInfo, persistenceFields, otherFields, c);
+			classContainer = new ClassContainer(shortInfo, persistenceFields, otherFields, c, customSerializeMethod);
 		}
 		ClassDatabase.getInstance(j.adapter.getClass()).updateDatabase(classContainer);
 		j.classDatabase.put(c, classContainer);
@@ -268,7 +309,7 @@ public class ETJUtility {
 	}
 
 	private static long classToStack(Queue<GeneratorRequest> stack, ETJReference j, Object o, Object json,
-	                                 int remainingScanningDepth) {
+									 int remainingScanningDepth) {
 		Class cl = o.getClass();
 		ClassContainer classContainer = checkClass(j, cl);
 		if (classContainer == null) return 0;
@@ -297,7 +338,7 @@ public class ETJUtility {
 				if (!fieldContainer.jsonGenColumnAnnotated) {
 					if (fieldContainer.transientPersistence &&
 							!(j.includeTransientFields || j.nullSafeContains(j.includeTransientFieldsIn, fieldContainer.getter.getDeclaringClass()))
-					) {
+							) {
 						continue;
 					}
 					if (!fieldContainer.suitable && !(j.includeNonJPAFields || j.nullSafeContains(j.includeNonJPAFieldsIn, fieldContainer.getter.getDeclaringClass()))) {
@@ -315,7 +356,7 @@ public class ETJUtility {
 	}
 
 	private static void fieldToStack(FieldContainer fieldContainer, ETJReference j, Object o, Object json,
-	                                 int remainingScanningDepth, Queue<GeneratorRequest> stack)
+									 int remainingScanningDepth, Queue<GeneratorRequest> stack)
 			throws IllegalAccessException, InvocationTargetException {
 		Class cl = o.getClass();
 		fieldContainer.getter.setAccessible(true); //local classes
@@ -357,7 +398,7 @@ public class ETJUtility {
 	}
 
 	private static GeneratorRequest createGeneratorRequest(Object caller, Object object, FieldContainer objectDescription, Object json,
-	                                                       int remainingScanningDepth) {
+														   int remainingScanningDepth) {
 		if (json instanceof JSONObject) {
 			return new GeneratorRequest(caller, object, objectDescription, (JSONObject) json, remainingScanningDepth);
 		} else {
